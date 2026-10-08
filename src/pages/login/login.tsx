@@ -1,3 +1,6 @@
+import {Link} from 'react-router-dom';
+import {AppRoute} from '../../const.ts';
+
 function Login() {
   return (
     <div className="page page--gray page--login">
@@ -5,9 +8,12 @@ function Login() {
         <div className="container">
           <div className="header__wrapper">
             <div className="header__left">
-              <a className="header__logo-link" href="main.html">
+              <Link
+                className="header__logo-link"
+                to={AppRoute.Main}
+              >
                 <img className="header__logo" src="img/logo.svg" alt="6 cities logo" width="81" height="41"/>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -19,8 +25,9 @@ function Login() {
             <h1 className="login__title">Sign in</h1>
             <form className="login__form form" action="#" method="post">
               <div className="login__input-wrapper form__input-wrapper">
-                <label className="visually-hidden">E-mail</label>
+                <label className="visually-hidden" htmlFor={'email'}>E-mail</label>
                 <input
+                  id="email"
                   className="login__input form__input"
                   type="email"
                   name="email"
@@ -29,8 +36,9 @@ function Login() {
                 />
               </div>
               <div className="login__input-wrapper form__input-wrapper">
-                <label className="visually-hidden">Password</label>
+                <label className="visually-hidden" htmlFor={'password'}>Password</label>
                 <input
+                  id="password"
                   className="login__input form__input"
                   type="password"
                   name="password"

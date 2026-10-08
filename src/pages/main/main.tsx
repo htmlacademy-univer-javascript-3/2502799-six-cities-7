@@ -1,4 +1,4 @@
-import Card from '../components/Card.tsx';
+import Card from '../../components/card/card.tsx';
 
 type MainProps = {
   offerCounts: number;
