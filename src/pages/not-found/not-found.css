@@ -29,12 +29,18 @@
   text-align: center;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(0, 0, 0, 0.06);
-  transition: transform 0.12s ease-out, box-shadow 0.2s ease;
+  /* Заранее выносим карточку в композитный GPU-слой, чтобы не было фриза при первом наведении */
+  will-change: transform;
+  backface-visibility: hidden;
+  /* Плавный возврат в исходное положение при уходе курсора */
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
   overflow: hidden;
   user-select: none;
 }
 
-.not-found-card:hover {
+/* Когда курсор внутри карточки, минимальный transition даёт мгновенный и плавный отклик */
+.not-found-card--active {
+  transition: transform 0.05s linear, box-shadow 0.25s ease;
   box-shadow: 0 24px 60px rgba(68, 129, 195, 0.16), 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
@@ -43,6 +49,14 @@
   inset: 0;
   pointer-events: none;
   z-index: 1;
+  /* Скрываем через opacity вместо удаления из DOM */
+  opacity: 0;
+  will-change: opacity, background;
+  transition: opacity 0.25s ease;
+}
+
+.not-found-card__spotlight--visible {
+  opacity: 1;
 }
 
 .not-found-card__code {
