@@ -1,54 +1,96 @@
-import {useState, useRef} from 'react';
+import {useState, useRef, useEffect} from 'react';
 import {Link} from 'react-router-dom';
 import {AppRoute} from '../../const.ts';
 import './not-found.css';
 
-type Coordinates = {
-  x: number;
-  y: number;
-};
-
-type TiltDegrees = {
+type CardInteractionState = {
+  mouseX: number;
+  mouseY: number;
   rotateX: number;
   rotateY: number;
+  isHovered: boolean;
 };
 
 const MAX_TILT_DEGREE = 8;
 const PERSPECTIVE_PX = 1000;
 
+const INITIAL_INTERACTION_STATE: CardInteractionState = {
+  mouseX: 0,
+  mouseY: 0,
+  rotateX: 0,
+  rotateY: 0,
+  isHovered: false,
+};
+
 function NotFound() {
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const [mouseCoordinates, setMouseCoordinates] = useState<Coordinates>({x: 0, y: 0});
-  const [tiltDegrees, setTiltDegrees] = useState<TiltDegrees>({rotateX: 0, rotateY: 0});
-  const [isHovered, setIsHovered] = useState<boolean>(false);
+
+  const cardRectRef = useRef<DOMRect | null>(null);
+  const frameIdRef = useRef<number | null>(null);
+
+  const [interaction, setInteraction] = useState<CardInteractionState>(INITIAL_INTERACTION_STATE);
+
+  useEffect(() => () => {
+    if (frameIdRef.current !== null) {
+      cancelAnimationFrame(frameIdRef.current);
+    }
+  }, []);
+
+  const handleCardMouseEnter = () => {
+    if (cardRef.current) {
+      cardRectRef.current = cardRef.current.getBoundingClientRect();
+    }
+  };
 
   const handleCardMouseMove = (evt: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) {
+    if (!cardRectRef.current && cardRef.current) {
+      cardRectRef.current = cardRef.current.getBoundingClientRect();
+    }
+
+    const rect = cardRectRef.current;
+    if (!rect) {
       return;
     }
 
-    const cardRect = cardRef.current.getBoundingClientRect();
-    const relativeX = evt.clientX - cardRect.left;
-    const relativeY = evt.clientY - cardRect.top;
+    const clientX = evt.clientX;
+    const clientY = evt.clientY;
 
-    const centerX = cardRect.width / 2;
-    const centerY = cardRect.height / 2;
+    if (frameIdRef.current !== null) {
+      cancelAnimationFrame(frameIdRef.current);
+    }
 
-    const calculatedRotateY = ((relativeX - centerX) / centerX) * MAX_TILT_DEGREE;
-    const calculatedRotateX = -((relativeY - centerY) / centerY) * MAX_TILT_DEGREE;
+    frameIdRef.current = requestAnimationFrame(() => {
+      const relativeX = clientX - rect.left;
+      const relativeY = clientY - rect.top;
 
-    setMouseCoordinates({x: relativeX, y: relativeY});
-    setTiltDegrees({
-      rotateX: Number(calculatedRotateX.toFixed(2)),
-      rotateY: Number(calculatedRotateY.toFixed(2)),
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      const calculatedRotateY = ((relativeX - centerX) / centerX) * MAX_TILT_DEGREE;
+      const calculatedRotateX = -((relativeY - centerY) / centerY) * MAX_TILT_DEGREE;
+
+      setInteraction({
+        mouseX: relativeX,
+        mouseY: relativeY,
+        rotateX: Number(calculatedRotateX.toFixed(2)),
+        rotateY: Number(calculatedRotateY.toFixed(2)),
+        isHovered: true,
+      });
     });
-    setIsHovered(true);
   };
 
   const handleCardMouseLeave = () => {
-    setTiltDegrees({rotateX: 0, rotateY: 0});
-    setIsHovered(false);
+    if (frameIdRef.current !== null) {
+      cancelAnimationFrame(frameIdRef.current);
+    }
+    cardRectRef.current = null;
+    setInteraction((previousState) => ({
+      ...previousState,
+      rotateX: 0,
+      rotateY: 0,
+      isHovered: false,
+    }));
   };
 
   return (
@@ -70,16 +112,16 @@ function NotFound() {
             <nav className="header__nav">
               <ul className="header__nav-list">
                 <li className="header__nav-item user">
-                  <a className="header__nav-link header__nav-link--profile" href="#">
+                  <Link className="header__nav-link header__nav-link--profile" to={AppRoute.Favorites}>
                     <div className="header__avatar-wrapper user__avatar-wrapper"></div>
                     <span className="header__user-name user__name">Oliver.conner@gmail.com</span>
                     <span className="header__favorite-count">3</span>
-                  </a>
+                  </Link>
                 </li>
                 <li className="header__nav-item">
-                  <a className="header__nav-link" href="#">
+                  <Link className="header__nav-link" to={AppRoute.Login}>
                     <span className="header__signout">Sign out</span>
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </nav>
@@ -91,21 +133,22 @@ function NotFound() {
         <div className="container not-found-wrapper">
           <div
             ref={cardRef}
-            className="not-found-card"
+            className={`not-found-card ${interaction.isHovered ? 'not-found-card--active' : ''}`}
+            onMouseEnter={handleCardMouseEnter}
             onMouseMove={handleCardMouseMove}
             onMouseLeave={handleCardMouseLeave}
             style={{
-              transform: `perspective(${PERSPECTIVE_PX}px) rotateX(${tiltDegrees.rotateX}deg) rotateY(${tiltDegrees.rotateY}deg)`,
+              transform: `perspective(${PERSPECTIVE_PX}px) rotateX(${interaction.rotateX}deg) rotateY(${interaction.rotateY}deg) translateZ(0)`,
             }}
           >
-            {isHovered && (
-              <div
-                className="not-found-card__spotlight"
-                style={{
-                  background: `radial-gradient(circle 240px at ${mouseCoordinates.x}px ${mouseCoordinates.y}px, rgba(68, 129, 195, 0.22), transparent 80%)`,
-                }}
-              />
-            )}
+            <div
+              className={`not-found-card__spotlight ${
+                interaction.isHovered ? 'not-found-card__spotlight--visible' : ''
+              }`}
+              style={{
+                background: `radial-gradient(circle 240px at ${interaction.mouseX}px ${interaction.mouseY}px, rgba(68, 129, 195, 0.22), transparent 80%)`,
+              }}
+            />
 
             <h1 className="not-found-card__code">404</h1>
             <h2 className="not-found-card__title">Страница не найдена</h2>

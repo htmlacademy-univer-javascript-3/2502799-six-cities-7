@@ -1,34 +1,42 @@
-import Card from '../../components/card/card.tsx';
+import {Offers} from '../../types/offer.ts';
+import OffersList from '../../components/offers-list/offers-list.tsx';
+import {Link} from 'react-router-dom';
+import {AppRoute, CITIES} from '../../const.ts';
 
 type MainProps = {
   offerCounts: number;
+  offers: Offers;
 };
 
-function Main({offerCounts}: MainProps) {
+const DEFAULT_ACTIVE_CITY = 'Amsterdam';
+
+function Main({offerCounts, offers}: MainProps) {
+
+  const favoriteCount = offers.filter((offer) => offer.isFavorite).length;
+
   return (
     <div className="page page--gray page--main">
       <header className="header">
         <div className="container">
           <div className="header__wrapper">
             <div className="header__left">
-              <a className="header__logo-link header__logo-link--active">
+              <Link className="header__logo-link header__logo-link--active" to={AppRoute.Main}>
                 <img className="header__logo" src="img/logo.svg" alt="6 cities logo" width="81" height="41"/>
-              </a>
+              </Link>
             </div>
             <nav className="header__nav">
               <ul className="header__nav-list">
                 <li className="header__nav-item user">
-                  <a className="header__nav-link header__nav-link--profile" href="#">
-                    <div className="header__avatar-wrapper user__avatar-wrapper">
-                    </div>
+                  <Link className="header__nav-link header__nav-link--profile" to={AppRoute.Favorites}>
+                    <div className="header__avatar-wrapper user__avatar-wrapper"></div>
                     <span className="header__user-name user__name">Oliver.conner@gmail.com</span>
-                    <span className="header__favorite-count">3</span>
-                  </a>
+                    <span className="header__favorite-count">{favoriteCount}</span>
+                  </Link>
                 </li>
                 <li className="header__nav-item">
-                  <a className="header__nav-link" href="#">
+                  <Link className="header__nav-link" to={AppRoute.Login}>
                     <span className="header__signout">Sign out</span>
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </nav>
@@ -41,36 +49,18 @@ function Main({offerCounts}: MainProps) {
         <div className="tabs">
           <section className="locations container">
             <ul className="locations__list tabs__list">
-              <li className="locations__item">
-                <a className="locations__item-link tabs__item" href="#">
-                  <span>Paris</span>
-                </a>
-              </li>
-              <li className="locations__item">
-                <a className="locations__item-link tabs__item" href="#">
-                  <span>Cologne</span>
-                </a>
-              </li>
-              <li className="locations__item">
-                <a className="locations__item-link tabs__item" href="#">
-                  <span>Brussels</span>
-                </a>
-              </li>
-              <li className="locations__item">
-                <a className="locations__item-link tabs__item tabs__item--active">
-                  <span>Amsterdam</span>
-                </a>
-              </li>
-              <li className="locations__item">
-                <a className="locations__item-link tabs__item" href="#">
-                  <span>Hamburg</span>
-                </a>
-              </li>
-              <li className="locations__item">
-                <a className="locations__item-link tabs__item" href="#">
-                  <span>Dusseldorf</span>
-                </a>
-              </li>
+              {CITIES.map((city) => (
+                <li key={city} className="locations__item">
+                  <Link
+                    className={`locations__item-link tabs__item ${
+                      city === DEFAULT_ACTIVE_CITY ? 'tabs__item--active' : ''
+                    }`}
+                    to={AppRoute.Main}
+                  >
+                    <span>{city}</span>
+                  </Link>
+                </li>
+              ))}
             </ul>
           </section>
         </div>
@@ -94,13 +84,7 @@ function Main({offerCounts}: MainProps) {
                   <li className="places__option" tabIndex={0}>Top rated first</li>
                 </ul>
               </form>
-              <div className="cities__places-list places__list tabs__content">
-                <Card />
-                <Card />
-                <Card />
-                <Card />
-                <Card />
-              </div>
+              <OffersList offers={offers} />
             </section>
             <div className="cities__right-section">
               <section className="cities__map map"></section>
