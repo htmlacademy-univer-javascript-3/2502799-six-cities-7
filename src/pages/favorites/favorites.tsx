@@ -9,7 +9,7 @@ type FavoritesProps = {
 
 function Favorites({offers}: FavoritesProps) {
   const favoriteOffers = offers.filter((offer) => offer.isFavorite);
-  const favoriteCities = Array.from(new Set(favoriteOffers.map((offer) => offer.city.name)));
+  const favoriteCities = Array.from(new Set(favoriteOffers.map((offer) => offer.city)));
 
   return (
     <div className="page">
@@ -48,7 +48,7 @@ function Favorites({offers}: FavoritesProps) {
             <h1 className="favorites__title">Saved listing</h1>
             <ul className="favorites__list">
               {favoriteCities.map((cityName) => {
-                const cityOffers = favoriteOffers.filter((offer) => offer.city.name === cityName);
+                const cityOffers = favoriteOffers.filter((offer) => offer.city === cityName);
 
                 return (
                   <li key={cityName} className="favorites__locations-items">
