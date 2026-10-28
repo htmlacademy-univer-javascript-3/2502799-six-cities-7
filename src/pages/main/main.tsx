@@ -1,5 +1,6 @@
 import {Offers} from '../../types/offer.ts';
 import OffersList from '../../components/offers-list/offers-list.tsx';
+import Map from '../../components/map/map.tsx';
 import {Link} from 'react-router-dom';
 import {AppRoute, CITIES} from '../../const.ts';
 
@@ -13,6 +14,7 @@ const DEFAULT_ACTIVE_CITY = 'Amsterdam';
 function Main({offerCounts, offers}: MainProps) {
 
   const favoriteCount = offers.filter((offer) => offer.isFavorite).length;
+  const city = offers[0].city;
 
   return (
     <div className="page page--gray page--main">
@@ -49,15 +51,15 @@ function Main({offerCounts, offers}: MainProps) {
         <div className="tabs">
           <section className="locations container">
             <ul className="locations__list tabs__list">
-              {CITIES.map((city) => (
-                <li key={city} className="locations__item">
+              {CITIES.map((cityName) => (
+                <li key={cityName} className="locations__item">
                   <Link
                     className={`locations__item-link tabs__item ${
-                      city === DEFAULT_ACTIVE_CITY ? 'tabs__item--active' : ''
+                      cityName === DEFAULT_ACTIVE_CITY ? 'tabs__item--active' : ''
                     }`}
                     to={AppRoute.Main}
                   >
-                    <span>{city}</span>
+                    <span>{cityName}</span>
                   </Link>
                 </li>
               ))}
@@ -87,7 +89,9 @@ function Main({offerCounts, offers}: MainProps) {
               <OffersList offers={offers} />
             </section>
             <div className="cities__right-section">
-              <section className="cities__map map"></section>
+              <section className="cities__map map">
+                <Map city={city} offers={offers} />
+              </section>
             </div>
           </div>
         </div>
