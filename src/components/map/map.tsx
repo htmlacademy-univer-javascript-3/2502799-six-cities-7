@@ -23,6 +23,11 @@ function Map({city, offers}: MapProps): JSX.Element {
 
   useEffect(() => {
     if (map) {
+      map.setView(
+        [city.location.latitude, city.location.longitude],
+        city.location.zoom
+      );
+
       const markerLayer = layerGroup().addTo(map);
 
       offers.forEach((offer) => {
@@ -38,7 +43,7 @@ function Map({city, offers}: MapProps): JSX.Element {
         map.removeLayer(markerLayer);
       };
     }
-  }, [map, offers]);
+  }, [map, offers, city]);
 
   return <div style={{height: '100%'}} ref={mapRef}></div>;
 }
