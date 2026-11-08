@@ -1,19 +1,22 @@
 import {Link, useParams} from 'react-router-dom';
 import {AppRoute} from '../../const.ts';
 import {Offers} from '../../types/offer.ts';
+import {Reviews} from '../../types/review.ts';
 import ReviewForm from '../../components/review-form/review-form.tsx';
+import ReviewsList from '../../components/reviews-list/reviews-list.tsx';
+import OffersList from '../../components/offers-list/offers-list.tsx';
+import Map from '../../components/map/map.tsx';
 import NotFound from '../not-found/not-found.tsx';
 import {getRatingWidth} from '../../utils.ts';
-import Card from '../../components/card/card.tsx';
 
 type OfferProps = {
   offers: Offers;
+  reviews?: Reviews;
 };
 
 const MAX_NEAR_PLACES_COUNT = 3;
 
-function Offer({offers}: OfferProps) {
-
+function Offer({offers, reviews = []}: OfferProps): JSX.Element {
   const {id} = useParams<{id: string}>();
   const currentOffer = offers.find((item) => item.id === id);
 
@@ -141,56 +144,19 @@ function Offer({offers}: OfferProps) {
                 </div>
               </div>
               <section className="offer__reviews reviews">
-                <h2 className="reviews__title">Reviews &middot; <span className="reviews__amount">1</span></h2>
-                <ul className="reviews__list">
-                  <li className="reviews__item">
-                    <div className="reviews__user user">
-                      <div className="reviews__avatar-wrapper user__avatar-wrapper">
-                        <img
-                          className="reviews__avatar user__avatar"
-                          src="img/avatar-max.jpg"
-                          width="54"
-                          height="54"
-                          alt="Reviews avatar"
-                        />
-                      </div>
-                      <span className="reviews__user-name">
-                        Max
-                      </span>
-                    </div>
-                    <div className="reviews__info">
-                      <div className="reviews__rating rating">
-                        <div className="reviews__stars rating__stars">
-                          <span style={{width: '80%'}}></span>
-                          <span className="visually-hidden">Rating</span>
-                        </div>
-                      </div>
-                      <p className="reviews__text">
-                        A quiet cozy and picturesque that hides behind a a river by the unique lightness of Amsterdam.
-                        The building is green and from 18th century.
-                      </p>
-                      <time className="reviews__time" dateTime="2019-04-24">April 2019</time>
-                    </div>
-                  </li>
-                </ul>
+                <ReviewsList reviews={reviews} />
                 <ReviewForm />
               </section>
             </div>
           </div>
-          <section className="offer__map map"></section>
+          <section className="offer__map map">
+            <Map city={currentOffer.city} offers={nearOffers} />
+          </section>
         </section>
         <div className="container">
           <section className="near-places places">
             <h2 className="near-places__title">Other places in the neighbourhood</h2>
-            <div className="near-places__list places__list">
-              {nearOffers.map((nearOffer) => (
-                <Card
-                  key={nearOffer.id}
-                  offer={nearOffer}
-                  variant="near-places"
-                />
-              ))}
-            </div>
+            <OffersList offers={nearOffers} variant="near-places" />
           </section>
         </div>
       </main>
